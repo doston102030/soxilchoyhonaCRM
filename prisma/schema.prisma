@@ -1,0 +1,92 @@
+// Sohil Choyxona — ma'lumotlar bazasi sxemasi
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./sohil.db"
+}
+
+// Mahsulot kategoriyalari
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  icon      String    // emoji: 🍞 🥗 🌶 🥤 🍢 🍗
+  sortOrder Int       @default(0)
+  products  Product[]
+  createdAt DateTime  @default(now())
+}
+
+// Mahsulotlar
+model Product {
+  id         Int         @id @default(autoincrement())
+  name       String
+  price      Int         // so'mda (butun son)
+  categoryId Int
+  category   Category    @relation(fields: [categoryId], references: [id])
+  isWeighted Boolean     @default(false) // kg bo'yicha sotiladigan (kanotcha, o'rdak)
+  unit       String      @default("dona") // "dona" | "kg" | "L"
+  isActive   Boolean     @default(true)
+  orderItems OrderItem[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+// Xonalar / stollar
+model Table {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique // "Kapa 1", "Sori 6", "Katta xona tepa 1"
+  zone      String   // "Kapa", "Sori", "O'rta sori", "Pastki stol", "Katta xona tepa", "Katta xona tepa stol"
+  sortOrder Int      @default(0)
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
+// Ofitsiantlar
+model Waiter {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
+// Buyurtmalar
+model Order {
+  id            Int         @id @default(autoincrement())
+  tableId       Int
+  table         Table       @relation(fields: [tableId], references: [id])
+  waiterId      Int?
+  waiter        Waiter?     @relation(fields: [waiterId], references: [id])
+  items         OrderItem[]
+  subtotal      Int         // xizmat haqisiz
+  serviceCharge Int         // 1% xizmat haqi
+  total         Int         // jami
+  status        String      @default("open") // "open" | "paid" | "cancelled"
+  note          String?
+  createdAt     DateTime    @default(now())
+  paidAt        DateTime?
+  updatedAt     DateTime    @updatedAt
+
+  @@index([createdAt])
+  @@index([status])
+  @@index([waiterId])
+}
+
+// Buyurtma ichidagi mahsulotlar
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  name      String  // snapshot (narx o'zgarsa ham eski ma'lumot saqlansin)
+  price     Int     // birlik narx (snapshot)
+  quantity  Float   // kg uchun 1.2 kabi
+  total     Int     // price * quantity
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}

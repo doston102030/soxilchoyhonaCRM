@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Sohil Choyxona — issiq, tabiiy, yashil-qum rangi */
+    --background: 40 30% 97%;
+    --foreground: 150 30% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 150 30% 12%;
+
+    --primary: 150 55% 22%;           /* to'q yashil */
+    --primary-foreground: 40 30% 97%;
+
+    --secondary: 40 35% 92%;
+    --secondary-foreground: 150 30% 15%;
+
+    --muted: 40 20% 94%;
+    --muted-foreground: 150 10% 40%;
+
+    --accent: 25 85% 55%;              /* olovli to'q sariq */
+    --accent-foreground: 40 30% 97%;
+
+    --destructive: 0 75% 50%;
+    --destructive-foreground: 40 30% 97%;
+
+    --border: 40 20% 85%;
+    --input: 40 20% 88%;
+    --ring: 150 55% 22%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 150 20% 8%;
+    --foreground: 40 30% 95%;
+    --card: 150 20% 11%;
+    --card-foreground: 40 30% 95%;
+    --primary: 150 50% 55%;
+    --primary-foreground: 150 30% 10%;
+    --secondary: 150 15% 16%;
+    --secondary-foreground: 40 30% 95%;
+    --muted: 150 15% 16%;
+    --muted-foreground: 150 10% 65%;
+    --accent: 25 85% 60%;
+    --accent-foreground: 150 30% 10%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 40 30% 95%;
+    --border: 150 15% 20%;
+    --input: 150 15% 20%;
+    --ring: 150 50% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    background-image:
+      radial-gradient(at 0% 0%, hsl(150 40% 90% / 0.5) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsl(25 70% 90% / 0.4) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+/* Thin scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+
+/* Print — chek uchun */
+@media print {
+  body { background: white !important; }
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+}
+.print-only { display: none; }
+
+/* Hide scrollbar but allow scroll */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
