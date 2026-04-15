@@ -67,31 +67,31 @@ async function main() {
   // === MAHSULOTLAR ===
   const products = [
     // Asosiy
-    { name: "Non", price: 4000, cat: "Asosiy" },
-    { name: "Choy", price: 3000, cat: "Asosiy" },
-    { name: "Salfetka", price: 5000, cat: "Asosiy" },
-    { name: "Nam salfetka", price: 4000, cat: "Asosiy" },
+    { name: "Non", price: 4000, cat: "Asosiy", emoji: "🍞" },
+    { name: "Choy", price: 3000, cat: "Asosiy", emoji: "🫖" },
+    { name: "Salfetka", price: 5000, cat: "Asosiy", emoji: "🧻" },
+    { name: "Nam salfetka", price: 4000, cat: "Asosiy", emoji: "💧" },
     // Salatlar
-    { name: "Kichik salat", price: 10000, cat: "Salatlar" },
-    { name: "Katta salat", price: 20000, cat: "Salatlar" },
+    { name: "Kichik salat", price: 10000, cat: "Salatlar", emoji: "🥗" },
+    { name: "Katta salat", price: 20000, cat: "Salatlar", emoji: "🥙" },
     // Qo'shimchalar
-    { name: "Kalampir", price: 2000, cat: "Qo'shimchalar" },
+    { name: "Kalampir", price: 2000, cat: "Qo'shimchalar", emoji: "🌶️" },
     // Ichimliklar
-    { name: "Pepsi 1L", price: 15000, cat: "Ichimliklar" },
-    { name: "Pepsi 1.5L", price: 18000, cat: "Ichimliklar" },
-    { name: "Coca-Cola 1.5L", price: 18000, cat: "Ichimliklar" },
-    { name: "Coca-Cola 2L", price: 20000, cat: "Ichimliklar" },
-    { name: "Fanta 1.5L", price: 18000, cat: "Ichimliklar" },
-    { name: "Sok (Viko)", price: 22000, cat: "Ichimliklar" },
-    { name: "Silver suv", price: 5000, cat: "Ichimliklar" },
-    { name: "Garden sharbat", price: 20000, cat: "Ichimliklar" },
+    { name: "Pepsi 1L", price: 15000, cat: "Ichimliklar", emoji: "🥤" },
+    { name: "Pepsi 1.5L", price: 18000, cat: "Ichimliklar", emoji: "🥤" },
+    { name: "Coca-Cola 1.5L", price: 18000, cat: "Ichimliklar", emoji: "🍾" },
+    { name: "Coca-Cola 2L", price: 20000, cat: "Ichimliklar", emoji: "🍾" },
+    { name: "Fanta 1.5L", price: 18000, cat: "Ichimliklar", emoji: "🧃" },
+    { name: "Sok (Viko)", price: 22000, cat: "Ichimliklar", emoji: "🍹" },
+    { name: "Silver suv", price: 5000, cat: "Ichimliklar", emoji: "💧" },
+    { name: "Garden sharbat", price: 20000, cat: "Ichimliklar", emoji: "🍓" },
     // Shashliklar
-    { name: "Qiyma shashlik", price: 20000, cat: "Shashliklar" },
-    { name: "Go'sht shashlik", price: 24000, cat: "Shashliklar" },
-    { name: "Qo'y go'shti shashlik", price: 30000, cat: "Shashliklar" },
+    { name: "Qiyma shashlik", price: 20000, cat: "Shashliklar", emoji: "🍢" },
+    { name: "Go'sht shashlik", price: 24000, cat: "Shashliklar", emoji: "🥩" },
+    { name: "Qo'y go'shti shashlik", price: 30000, cat: "Shashliklar", emoji: "🍖" },
     // Maxsus (kg bo'yicha)
-    { name: "Kanotcha", price: 75000, cat: "Maxsus taomlar", isWeighted: true, unit: "kg" },
-    { name: "O'rdak go'shti", price: 140000, cat: "Maxsus taomlar", isWeighted: true, unit: "kg" },
+    { name: "Kanotcha", price: 75000, cat: "Maxsus taomlar", emoji: "🍗", isWeighted: true, unit: "kg" },
+    { name: "O'rdak go'shti", price: 140000, cat: "Maxsus taomlar", emoji: "🦆", isWeighted: true, unit: "kg" },
   ];
 
   for (const p of products) {
@@ -100,8 +100,9 @@ async function main() {
       name: p.name,
       price: p.price,
       categoryId: catMap[p.cat],
-      isWeighted: p.isWeighted ?? false,
-      unit: p.unit ?? "dona",
+      emoji: (p as any).emoji ?? "🍽",
+      isWeighted: (p as any).isWeighted ?? false,
+      unit: (p as any).unit ?? "dona",
     };
     if (existing) {
       await prisma.product.update({ where: { id: existing.id }, data });
