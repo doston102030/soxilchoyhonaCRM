@@ -8,7 +8,7 @@ import { ArrowLeft, Plus, Minus, Trash2, ShoppingCart, Printer, Check, ChevronDo
 import { formatSom, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 
-type Product = { id: number; name: string; price: number; isWeighted: boolean; unit: string; emoji: string };
+type Product = { id: number; name: string; price: number; isWeighted: boolean; unit: string; emoji: string; imageUrl?: string };
 type Category = { id: number; name: string; icon: string; products: Product[] };
 type CartItem = { productId: number; name: string; price: number; quantity: number; isWeighted: boolean; unit: string; emoji: string };
 type ExistingOrder = {
@@ -205,9 +205,12 @@ export default function OrderPage({ params }: { params: Promise<{ tableId: strin
                   onClick={() => addToCart(p)}
                   className="group text-left bg-card border-2 border-border rounded-2xl overflow-hidden hover:border-accent/60 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-150 active:scale-95"
                 >
-                  {/* Emoji rasm qismi */}
-                  <div className="w-full h-20 bg-gradient-to-br from-muted/80 to-muted/40 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-200">
-                    {p.emoji}
+                  {/* Rasm qismi */}
+                  <div className="w-full h-24 bg-gradient-to-br from-muted/80 to-muted/40 flex items-center justify-center overflow-hidden">
+                    {p.imageUrl
+                      ? <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200" />
+                      : <span className="text-4xl group-hover:scale-110 transition-transform duration-200">{p.emoji}</span>
+                    }
                   </div>
                   <div className="p-3">
                     <div className="font-semibold text-sm mb-1 leading-snug">{p.name}</div>

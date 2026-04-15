@@ -26,6 +26,7 @@ model Product {
   categoryId Int
   category   Category    @relation(fields: [categoryId], references: [id])
   emoji      String      @default("🍽")
+  imageUrl   String?
   isWeighted Boolean     @default(false) // kg bo'yicha sotiladigan (kanotcha, o'rdak)
   unit       String      @default("dona") // "dona" | "kg" | "L"
   isActive   Boolean     @default(true)
