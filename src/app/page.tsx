@@ -25,7 +25,7 @@ const ZONE_ICONS: Record<string, string> = {
 export default function HomePage() {
   const [tables, setTables] = useState<TableWithOrders[]>([]);
   const [loading, setLoading] = useState(true);
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState<Date | null>(null);
 
   async function load() {
     try {
@@ -39,6 +39,7 @@ export default function HomePage() {
 
   useEffect(() => {
     load();
+    setTime(new Date());
     const dataInterval = setInterval(load, 10000);
     const clockInterval = setInterval(() => setTime(new Date()), 1000);
     return () => { clearInterval(dataInterval); clearInterval(clockInterval); };
@@ -57,9 +58,9 @@ export default function HomePage() {
   const totalRevenue = tables.reduce((s, t) => s + t.orders.reduce((os, o) => os + o.total, 0), 0);
   const totalTables = tables.length;
 
-  const hours = time.getHours().toString().padStart(2, "0");
-  const minutes = time.getMinutes().toString().padStart(2, "0");
-  const seconds = time.getSeconds().toString().padStart(2, "0");
+  const hours = time ? time.getHours().toString().padStart(2, "0") : "--";
+  const minutes = time ? time.getMinutes().toString().padStart(2, "0") : "--";
+  const seconds = time ? time.getSeconds().toString().padStart(2, "0") : "--";
 
   return (
     <main className="min-h-screen">
