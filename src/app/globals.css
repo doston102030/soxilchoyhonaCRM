@@ -4,59 +4,59 @@
 
 @layer base {
   :root {
-    /* RETRO MODERN — qahva, krem, to'q yashil */
-    --background: 38 25% 95%;
-    --foreground: 20 15% 10%;
-
-    --card: 38 20% 98%;
-    --card-foreground: 20 15% 10%;
-
-    --primary: 158 45% 18%;
-    --primary-foreground: 38 25% 95%;
-
-    --secondary: 38 30% 90%;
-    --secondary-foreground: 20 15% 15%;
-
-    --muted: 38 20% 92%;
-    --muted-foreground: 20 10% 45%;
-
-    --accent: 22 80% 45%;
-    --accent-foreground: 38 25% 97%;
-
-    --destructive: 0 72% 48%;
-    --destructive-foreground: 38 25% 97%;
-
-    --border: 38 18% 84%;
-    --input: 38 18% 88%;
-    --ring: 158 45% 18%;
-
-    --radius: 0.5rem;
+    --background: 220 20% 97%;
+    --foreground: 224 40% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 40% 8%;
+    --primary: 152 72% 28%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 15% 93%;
+    --secondary-foreground: 224 40% 15%;
+    --muted: 220 15% 94%;
+    --muted-foreground: 220 12% 52%;
+    --accent: 24 92% 52%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 16% 88%;
+    --input: 220 16% 90%;
+    --ring: 152 72% 28%;
+    --radius: 1rem;
   }
 }
 
 @layer base {
-  * { @apply border-border; }
-
+  * { @apply border-border; box-sizing: border-box; }
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    background-color: hsl(38 25% 95%);
-    background-image:
-      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.018'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 50%, #fff7ed 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
   }
-
-  h1, h2, h3 { font-family: var(--font-display); }
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.5); }
-
-/* No scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Glass card */
+.glass {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.6);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #15803d, #f97316);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
 /* Print */
 @media print {
@@ -65,30 +65,3 @@
   .print-only { display: block !important; }
 }
 .print-only { display: none; }
-
-/* Retro badge */
-.badge-retro {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 2px;
-  border: 1.5px solid currentColor;
-}
-
-/* Stamp effect */
-.stamp {
-  position: relative;
-  display: inline-block;
-}
-.stamp::after {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border: 2px dashed currentColor;
-  border-radius: inherit;
-  opacity: 0.3;
-}
