@@ -27,7 +27,7 @@ export default function HomePage() {
 
   useEffect(() => {
     load(); setTime(new Date());
-    const d = setInterval(load, 10000);
+    const d = setInterval(load, 15000);
     const c = setInterval(() => setTime(new Date()), 1000);
     return () => { clearInterval(d); clearInterval(c); };
   }, []);

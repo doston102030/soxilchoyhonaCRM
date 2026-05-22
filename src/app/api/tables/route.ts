@@ -11,5 +11,7 @@ export async function GET() {
       },
     },
   });
-  return NextResponse.json(tables);
+  return NextResponse.json(tables, {
+    headers: { "Cache-Control": "no-store, max-age=0" },
+  });
 }
