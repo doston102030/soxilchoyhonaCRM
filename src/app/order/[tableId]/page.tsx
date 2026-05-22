@@ -4,13 +4,13 @@ import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Minus, Trash2, ShoppingCart, Printer, Check, ChevronDown, ChevronUp, Receipt } from "lucide-react";
+import { ArrowLeft, Plus, Minus, Trash2, Printer, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { formatSom, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 
 type Product = { id: number; name: string; price: number; isWeighted: boolean; unit: string; emoji: string; imageUrl?: string };
 type Category = { id: number; name: string; icon: string; products: Product[] };
-type CartItem = { productId: number; name: string; price: number; quantity: number; isWeighted: boolean; unit: string; emoji: string };
+type CartItem = { productId: number; name: string; price: number; quantity: number; isWeighted: boolean; unit: string; emoji: string; imageUrl?: string };
 type ExistingOrder = {
   id: number; total: number; subtotal: number; serviceCharge: number; createdAt: string;
   items: { id: number; name: string; price: number; quantity: number; total: number }[];
@@ -49,18 +49,16 @@ export default function OrderPage({ params }: { params: Promise<{ tableId: strin
     setCart(prev => {
       const ex = prev.find(i => i.productId === product.id);
       if (ex) return prev.map(i => i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i);
-      return [...prev, { productId: product.id, name: product.name, price: product.price, quantity: 1, isWeighted: false, unit: product.unit, emoji: product.emoji }];
+      return [...prev, { productId: product.id, name: product.name, price: product.price, quantity: 1, isWeighted: false, unit: product.unit, emoji: product.emoji, imageUrl: product.imageUrl }];
     });
-    toast.success(`${product.emoji} ${product.name} qo'shildi`, { duration: 1000 });
   }
 
   function addWeighted() {
     if (!weightDialog) return;
     const q = parseFloat(weightInput);
     if (isNaN(q) || q <= 0) { toast.error("Noto'g'ri miqdor"); return; }
-    setCart(prev => [...prev, { productId: weightDialog.id, name: weightDialog.name, price: weightDialog.price, quantity: q, isWeighted: true, unit: weightDialog.unit, emoji: weightDialog.emoji }]);
+    setCart(prev => [...prev, { productId: weightDialog.id, name: weightDialog.name, price: weightDialog.price, quantity: q, isWeighted: true, unit: weightDialog.unit, emoji: weightDialog.emoji, imageUrl: weightDialog.imageUrl }]);
     setWeightDialog(null);
-    toast.success(`${weightDialog.emoji} ${weightDialog.name} — ${q} ${weightDialog.unit}`);
   }
 
   function changeQty(idx: number, delta: number) {
@@ -85,8 +83,8 @@ export default function OrderPage({ params }: { params: Promise<{ tableId: strin
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tableId: Number(tableId), items: cart.map(i => ({ productId: i.productId, quantity: i.quantity })) }),
     });
-    if (!res.ok) { toast.error("Xato yuz berdi"); return; }
-    toast.success("✅ Buyurtma yuborildi!");
+    if (!res.ok) { toast.error("Xato"); return; }
+    toast.success("Buyurtma yuborildi!");
     setCart([]);
     loadData();
   }
@@ -94,7 +92,7 @@ export default function OrderPage({ params }: { params: Promise<{ tableId: strin
   async function payOrder(orderId: number) {
     const order = existingOrders.find(o => o.id === orderId);
     const res = await fetch(`/api/orders/${orderId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "pay" }) });
-    if (res.ok) { toast.success("💰 To'lov qabul qilindi!"); setReceiptOrder(order); loadData(); }
+    if (res.ok) { toast.success("To'lov qabul qilindi!"); setReceiptOrder(order); loadData(); }
   }
 
   function printReceipt(order: any) { setReceiptOrder(order); setTimeout(() => window.print(), 200); }
@@ -107,28 +105,30 @@ export default function OrderPage({ params }: { params: Promise<{ tableId: strin
     <main className="min-h-screen bg-background">
 
       {/* HEADER */}
-      <header className="sticky top-0 z-40 no-print bg-card/95 backdrop-blur-md border-b border-border/50">
+      <header className="sticky top-0 z-40 no-print bg-card/95 backdrop-blur-sm border-b-2 border-foreground/8">
         <div className="flex items-center gap-3 px-4 py-3">
           <Link href="/">
-            <button className="w-9 h-9 rounded-xl border border-border flex items-center justify-center hover:bg-muted transition-colors">
+            <button className="w-9 h-9 border border-border rounded-sm flex items-center justify-center hover:bg-muted transition-colors">
               <ArrowLeft className="w-4 h-4" />
             </button>
           </Link>
           <div className="flex-1">
-            <h1 className="font-display text-xl font-bold text-primary">{tableName}</h1>
-            <p className="text-xs text-muted-foreground">Buyurtma qabul qilish</p>
+            <div className="flex items-center gap-2">
+              <h1 className="font-display font-black text-lg tracking-tight">{tableName}</h1>
+              <span className="badge-retro text-muted-foreground border-border">buyurtma</span>
+            </div>
           </div>
           {existingOrders.length > 0 && (
-            <div className="text-right bg-accent/10 border border-accent/20 rounded-xl px-3 py-1.5">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Ochiq hisob</div>
-              <div className="font-bold text-accent text-sm">{formatSom(existingTotal)}</div>
+            <div className="text-right border border-accent/30 bg-accent/8 rounded-sm px-3 py-1.5">
+              <div className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold">Ochiq hisob</div>
+              <div className="font-mono font-black text-accent text-sm">{formatSom(existingTotal)}</div>
             </div>
           )}
         </div>
       </header>
 
       {/* BODY */}
-      <div className="grid lg:grid-cols-[1fr_340px] h-[calc(100vh-61px)]">
+      <div className="grid lg:grid-cols-[1fr_320px] h-[calc(100vh-61px)]">
 
         {/* CHAP: Menyu */}
         <div className="overflow-y-auto">
@@ -136,42 +136,39 @@ export default function OrderPage({ params }: { params: Promise<{ tableId: strin
 
             {/* Ochiq buyurtmalar */}
             {existingOrders.length > 0 && (
-              <div className="rounded-2xl border-2 border-accent/30 bg-accent/5 overflow-hidden">
-                <button
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-accent/10 transition-colors"
-                  onClick={() => setOrdersOpen(!ordersOpen)}
-                >
+              <div className="border-2 border-accent/30 bg-accent/5 rounded-sm overflow-hidden">
+                <button className="w-full flex items-center justify-between px-4 py-3 hover:bg-accent/8 transition-colors" onClick={() => setOrdersOpen(!ordersOpen)}>
                   <div className="flex items-center gap-2">
-                    <Receipt className="w-4 h-4 text-accent" />
-                    <span className="font-semibold text-sm">Ochiq buyurtmalar</span>
-                    <span className="bg-accent text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{existingOrders.length}</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                    <span className="font-bold text-sm uppercase tracking-wide">Ochiq buyurtmalar</span>
+                    <span className="font-mono text-xs bg-accent text-white px-1.5 py-0.5 rounded-sm font-bold">{existingOrders.length}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-accent text-sm">{formatSom(existingTotal)}</span>
-                    {ordersOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                    <span className="font-mono font-black text-accent text-sm">{formatSom(existingTotal)}</span>
+                    {ordersOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </div>
                 </button>
                 {ordersOpen && (
                   <div className="px-4 pb-4 space-y-3 border-t border-accent/20">
                     {existingOrders.map(o => (
-                      <div key={o.id} className="bg-card rounded-xl border border-border/60 overflow-hidden mt-3">
-                        <div className="flex items-center justify-between px-4 py-2.5 bg-muted/40 border-b border-border/40">
-                          <span className="text-xs text-muted-foreground">#{o.id} • {formatDate(o.createdAt)}</span>
-                          <span className="font-bold text-sm">{formatSom(o.total)}</span>
+                      <div key={o.id} className="bg-card border border-border/60 rounded-sm overflow-hidden mt-3">
+                        <div className="flex items-center justify-between px-4 py-2 bg-muted/60 border-b border-border/40">
+                          <span className="font-mono text-xs text-muted-foreground">#{o.id} · {formatDate(o.createdAt)}</span>
+                          <span className="font-mono font-black text-sm">{formatSom(o.total)}</span>
                         </div>
                         <div className="px-4 py-2.5 space-y-1">
                           {o.items.map(it => (
                             <div key={it.id} className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">{it.name} <span className="font-medium text-foreground">×{it.quantity}</span></span>
-                              <span className="font-medium">{formatSom(it.total)}</span>
+                              <span className="text-muted-foreground">{it.name} <span className="font-bold text-foreground">×{it.quantity}</span></span>
+                              <span className="font-mono font-semibold">{formatSom(it.total)}</span>
                             </div>
                           ))}
                         </div>
-                        <div className="flex gap-2 px-4 py-3 border-t border-border/40">
-                          <button onClick={() => payOrder(o.id)} className="flex-1 flex items-center justify-center gap-1.5 bg-accent text-white font-semibold text-sm py-2 rounded-lg hover:bg-accent/90 transition-colors">
-                            <Check className="w-4 h-4" /> To'lov
+                        <div className="flex gap-2 px-4 py-3 border-t border-border/40 bg-muted/30">
+                          <button onClick={() => payOrder(o.id)} className="flex-1 flex items-center justify-center gap-1.5 bg-accent text-white font-bold text-sm py-2 rounded-sm hover:bg-accent/90 transition-colors uppercase tracking-wide">
+                            <Check className="w-3.5 h-3.5" /> To'lov
                           </button>
-                          <button onClick={() => printReceipt(o)} className="w-10 h-9 flex items-center justify-center border border-border rounded-lg hover:bg-muted transition-colors">
+                          <button onClick={() => printReceipt(o)} className="w-10 h-9 flex items-center justify-center border border-border rounded-sm hover:bg-muted transition-colors">
                             <Printer className="w-4 h-4" />
                           </button>
                         </div>
@@ -182,41 +179,43 @@ export default function OrderPage({ params }: { params: Promise<{ tableId: strin
               </div>
             )}
 
-            {/* Kategoriya tablar */}
+            {/* Kategoriyalar */}
             <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
               {categories.map(c => (
-                <button
-                  key={c.id}
-                  onClick={() => setActiveCat(c.id)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-medium text-sm whitespace-nowrap transition-all border-2 shrink-0 ${
-                    activeCat === c.id ? "bg-primary text-white border-primary shadow-sm" : "bg-card border-border hover:border-primary/40"
+                <button key={c.id} onClick={() => setActiveCat(c.id)}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-sm font-bold text-xs whitespace-nowrap transition-all border-2 shrink-0 uppercase tracking-wide ${
+                    activeCat === c.id
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-card border-border hover:border-foreground/40 text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <span>{c.icon}</span>{c.name}
+                  {c.icon} {c.name}
                 </button>
               ))}
             </div>
 
-            {/* Mahsulotlar grid */}
+            {/* Mahsulotlar */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {activeProducts.map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => addToCart(p)}
-                  className="group text-left bg-card border-2 border-border rounded-2xl overflow-hidden hover:border-accent/60 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-150 active:scale-95"
+                <button key={p.id} onClick={() => addToCart(p)}
+                  className="group text-left bg-card border-2 border-border rounded-sm overflow-hidden hover:border-foreground/40 hover:shadow-md transition-all duration-150 active:scale-95"
                 >
-                  {/* Rasm qismi */}
-                  <div className="w-full h-24 bg-gradient-to-br from-muted/80 to-muted/40 flex items-center justify-center overflow-hidden">
+                  {/* Rasm */}
+                  <div className="w-full h-24 bg-muted/50 flex items-center justify-center overflow-hidden relative">
                     {p.imageUrl
-                      ? <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200" />
+                      ? <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       : <span className="text-4xl group-hover:scale-110 transition-transform duration-200">{p.emoji}</span>
                     }
+                    {/* + badge */}
+                    <div className="absolute top-2 right-2 w-6 h-6 bg-foreground/80 text-background rounded-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Plus className="w-3.5 h-3.5" />
+                    </div>
                   </div>
-                  <div className="p-3">
-                    <div className="font-semibold text-sm mb-1 leading-snug">{p.name}</div>
+                  <div className="p-3 border-t border-border/60">
+                    <div className="font-bold text-sm mb-1 leading-snug">{p.name}</div>
                     <div className="flex items-center justify-between">
-                      <span className="text-accent font-bold text-sm">{formatSom(p.price)}</span>
-                      {p.isWeighted && <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">/{p.unit}</span>}
+                      <span className="font-mono font-black text-accent text-sm">{formatSom(p.price)}</span>
+                      {p.isWeighted && <span className="badge-retro text-muted-foreground border-border/60 text-[9px]">/{p.unit}</span>}
                     </div>
                   </div>
                 </button>
@@ -226,15 +225,15 @@ export default function OrderPage({ params }: { params: Promise<{ tableId: strin
         </div>
 
         {/* O'NG: Savat */}
-        <div className="border-l border-border/50 bg-card flex flex-col no-print">
+        <div className="border-l-2 border-foreground/8 bg-card flex flex-col no-print">
           {/* Header */}
-          <div className="px-5 py-4 border-b border-border/50 flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-              <ShoppingCart className="w-4 h-4 text-primary" />
+          <div className="px-5 py-4 border-b border-border/60 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🛒</span>
+              <span className="font-display font-black text-base tracking-tight uppercase">Savat</span>
             </div>
-            <span className="font-display text-lg font-bold">Savat</span>
             {cartCount > 0 && (
-              <span className="ml-auto bg-accent text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">{cartCount}</span>
+              <span className="font-mono font-black text-xs bg-foreground text-background w-6 h-6 rounded-sm flex items-center justify-center">{cartCount}</span>
             )}
           </div>
 
@@ -242,33 +241,38 @@ export default function OrderPage({ params }: { params: Promise<{ tableId: strin
           <div className="flex-1 overflow-y-auto px-4 py-3">
             {cart.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center gap-3 py-10">
-                <div className="text-5xl">🛒</div>
-                <p className="text-muted-foreground text-sm">Mahsulot tanlang</p>
+                <div className="text-5xl opacity-30">🛒</div>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">Mahsulot tanlang</p>
               </div>
             ) : (
               <div className="space-y-2">
                 {cart.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2.5 bg-muted/40 rounded-xl px-3 py-2.5">
-                    <div className="text-xl shrink-0">{item.emoji}</div>
+                  <div key={idx} className="flex items-center gap-2.5 bg-muted/40 rounded-sm px-3 py-2.5 border border-border/40">
+                    <div className="w-8 h-8 rounded-sm overflow-hidden bg-muted shrink-0 flex items-center justify-center">
+                      {item.imageUrl
+                        ? <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
+                        : <span className="text-base">{item.emoji}</span>
+                      }
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{item.name}</div>
-                      <div className="text-xs text-muted-foreground">{formatSom(item.price * item.quantity)}</div>
+                      <div className="font-bold text-xs truncate">{item.name}</div>
+                      <div className="font-mono text-xs text-muted-foreground">{formatSom(item.price * item.quantity)}</div>
                     </div>
                     {item.isWeighted ? (
-                      <div className="text-sm font-bold text-accent">{item.quantity}{item.unit}</div>
+                      <span className="font-mono font-black text-xs text-accent">{item.quantity}{item.unit}</span>
                     ) : (
                       <div className="flex items-center gap-1">
-                        <button onClick={() => changeQty(idx, -1)} className="w-6 h-6 rounded-lg border bg-card flex items-center justify-center hover:bg-muted transition-colors">
+                        <button onClick={() => changeQty(idx, -1)} className="w-6 h-6 border border-border rounded-sm flex items-center justify-center hover:bg-muted transition-colors">
                           <Minus className="w-3 h-3" />
                         </button>
-                        <span className="w-6 text-center font-bold text-sm">{item.quantity}</span>
-                        <button onClick={() => changeQty(idx, 1)} className="w-6 h-6 rounded-lg border bg-card flex items-center justify-center hover:bg-muted transition-colors">
+                        <span className="w-6 text-center font-mono font-black text-sm">{item.quantity}</span>
+                        <button onClick={() => changeQty(idx, 1)} className="w-6 h-6 border border-border rounded-sm flex items-center justify-center hover:bg-muted transition-colors">
                           <Plus className="w-3 h-3" />
                         </button>
                       </div>
                     )}
-                    <button onClick={() => removeItem(idx)} className="w-6 h-6 flex items-center justify-center text-destructive/50 hover:text-destructive transition-colors">
-                      <Trash2 className="w-3.5 h-3.5" />
+                    <button onClick={() => removeItem(idx)} className="w-6 h-6 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors">
+                      <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
                 ))}
@@ -277,29 +281,27 @@ export default function OrderPage({ params }: { params: Promise<{ tableId: strin
           </div>
 
           {/* Footer */}
-          <div className="px-4 pb-4 pt-3 border-t border-border/50">
+          <div className="px-4 pb-5 pt-3 border-t border-border/60">
             {cart.length > 0 && (
-              <div className="bg-muted/40 rounded-xl px-4 py-3 mb-3 space-y-1.5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Jami</span>
-                  <span className="font-medium">{formatSom(subtotal)}</span>
+              <div className="border border-border/60 rounded-sm px-4 py-3 mb-3 space-y-1.5 bg-muted/30">
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground uppercase tracking-wide">Jami</span>
+                  <span className="font-mono font-semibold">{formatSom(subtotal)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Xizmat (1%)</span>
-                  <span className="font-medium">{formatSom(serviceCharge)}</span>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground uppercase tracking-wide">Xizmat (1%)</span>
+                  <span className="font-mono font-semibold">{formatSom(serviceCharge)}</span>
                 </div>
-                <div className="flex justify-between font-bold text-base pt-1.5 border-t border-border/50">
-                  <span>To'lov</span>
-                  <span className="text-accent">{formatSom(total)}</span>
+                <div className="flex justify-between font-black text-sm pt-2 border-t border-border/60">
+                  <span className="uppercase tracking-wide">To'lov</span>
+                  <span className="font-mono text-accent">{formatSom(total)}</span>
                 </div>
               </div>
             )}
-            <button
-              disabled={cart.length === 0}
-              onClick={submitOrder}
-              className="w-full py-3.5 rounded-xl font-bold bg-primary text-white hover:bg-primary/90 transition-all disabled:opacity-30 disabled:cursor-not-allowed text-sm"
+            <button disabled={cart.length === 0} onClick={submitOrder}
+              className="w-full py-3.5 rounded-sm font-black text-sm bg-foreground text-background hover:bg-foreground/85 transition-all disabled:opacity-25 disabled:cursor-not-allowed uppercase tracking-widest"
             >
-              {cart.length === 0 ? "Savat bo'sh" : `Buyurtma berish — ${formatSom(total)}`}
+              {cart.length === 0 ? "Savat bo'sh" : `Yuborish — ${formatSom(total)}`}
             </button>
           </div>
         </div>
@@ -307,36 +309,36 @@ export default function OrderPage({ params }: { params: Promise<{ tableId: strin
 
       {/* Og'irlik dialogi */}
       <Dialog open={!!weightDialog} onOpenChange={o => !o && setWeightDialog(null)}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm rounded-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <span className="text-3xl">{weightDialog?.emoji}</span>
+            <DialogTitle className="flex items-center gap-2 font-display font-black">
+              <span className="text-2xl">{weightDialog?.emoji}</span>
               {weightDialog?.name}
             </DialogTitle>
           </DialogHeader>
           <div className="py-3 space-y-3">
-            <div className="text-sm text-muted-foreground">
-              Narx: <span className="font-bold text-accent">{weightDialog && formatSom(weightDialog.price)}</span> / {weightDialog?.unit}
+            <div className="text-xs uppercase tracking-wide text-muted-foreground">
+              Narx: <span className="font-mono font-black text-accent">{weightDialog && formatSom(weightDialog.price)}</span> / {weightDialog?.unit}
             </div>
             <div className="grid grid-cols-5 gap-1.5">
               {[0.5, 1, 1.2, 1.5, 2].map(v => (
                 <button key={v} onClick={() => setWeightInput(v.toString())}
-                  className={`py-2 rounded-xl text-sm font-bold border-2 transition-all ${weightInput === v.toString() ? "bg-primary text-white border-primary" : "border-border hover:border-primary"}`}>
+                  className={`py-2 rounded-sm text-sm font-mono font-black border-2 transition-all ${weightInput === v.toString() ? "bg-foreground text-background border-foreground" : "border-border hover:border-foreground/50"}`}>
                   {v}
                 </button>
               ))}
             </div>
             <Input type="number" step="0.1" value={weightInput} onChange={e => setWeightInput(e.target.value)}
-              placeholder={`Miqdor (${weightDialog?.unit})`} className="text-center text-lg font-bold h-12" autoFocus />
+              className="text-center text-lg font-mono font-black h-12 rounded-sm" autoFocus />
             {weightDialog && weightInput && parseFloat(weightInput) > 0 && (
-              <div className="text-center bg-accent/10 rounded-xl py-2.5 font-bold text-accent text-lg">
+              <div className="text-center border border-accent/30 bg-accent/8 rounded-sm py-2.5 font-mono font-black text-accent text-lg">
                 {formatSom(Math.round(weightDialog.price * (parseFloat(weightInput) || 0)))}
               </div>
             )}
           </div>
           <DialogFooter className="gap-2">
-            <button onClick={() => setWeightDialog(null)} className="flex-1 py-2.5 rounded-xl border-2 border-border font-semibold text-sm">Bekor</button>
-            <button onClick={addWeighted} className="flex-1 py-2.5 rounded-xl bg-primary text-white font-bold text-sm">Qo'shish</button>
+            <button onClick={() => setWeightDialog(null)} className="flex-1 py-2.5 rounded-sm border-2 border-border font-bold text-sm uppercase tracking-wide">Bekor</button>
+            <button onClick={addWeighted} className="flex-1 py-2.5 rounded-sm bg-foreground text-background font-black text-sm uppercase tracking-wide">Qo'shish</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -350,7 +352,7 @@ export default function OrderPage({ params }: { params: Promise<{ tableId: strin
           </div>
           <div className="mb-2 text-xs">
             <div>Stol: {tableName}</div>
-            <div>#{receiptOrder.id} • {formatDate(receiptOrder.createdAt)}</div>
+            <div>#{receiptOrder.id} · {formatDate(receiptOrder.createdAt)}</div>
           </div>
           <div className="border-t border-dashed pt-2">
             {receiptOrder.items.map((it: any) => (

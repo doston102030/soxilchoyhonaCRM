@@ -1,74 +1,80 @@
-# ⚡ TEZKOR ISHGA TUSHIRISH
+# Sohil Choyxona — Ishga tushirish yo'riqnomasi
 
-## 1-marta o'rnatish (faqat bir marta qilinadi)
+## Loyiha haqida
+Choyxona uchun POS tizimi. Ofitsiantlar buyurtma qabul qiladi, admin statistika ko'radi.
 
-Loyiha papkasida terminalni oching va **ketma-ket** bu 2 ta buyruqni kiriting:
+---
 
-```bash
-npm install
-```
-
-Kutib turing (1-3 daqiqa), keyin:
+## 1. O'rnatish
 
 ```bash
-npm run setup
+git clone https://github.com/doston102030/soxilchoyhonaCRM.git
+cd soxilchoyhonaCRM
+npm install --legacy-peer-deps
 ```
 
-Bu buyruq:
-- Prisma clientni yaratadi
-- SQLite bazani ochadi
-- 19 ta stol va 20 ta mahsulotni yuklaydi
+---
 
-Agar "✅ Seed tugadi!" yozuvini ko'rsangiz — hammasi tayyor!
+## 2. Muhit o'zgaruvchilari
 
-## Ishga tushirish (har safar)
+`.env.local` fayl yarating:
+
+```env
+DATABASE_URL="postgresql://..."
+BLOB_READ_WRITE_TOKEN="..."
+```
+
+**DATABASE_URL** — Neon.tech dan oling:
+1. neon.tech → New Project → Create
+2. Connection string ni ko'chiring
+
+**BLOB_READ_WRITE_TOKEN** — Vercel Blob dan oling:
+1. Vercel → Storage → Create → Blob
+2. Token ni ko'chiring
+
+---
+
+## 3. Ma'lumotlar bazasini sozlash
+
+```bash
+npx prisma db push
+npm run db:seed
+```
+
+---
+
+## 4. Ishga tushirish
 
 ```bash
 npm run dev
 ```
 
-Brauzerda oching: **http://localhost:3000**
+Brauzerda: `http://localhost:3000`
 
 ---
 
-## ⚠️ AGAR XATO BO'LSA
+## 5. Sahifalar
 
-### Xato: "Cannot find module '@prisma/client'"
-```bash
-npx prisma generate
-```
-
-### Xato: "Table 'Table' does not exist"
-```bash
-npx prisma db push
-npx tsx prisma/seed.ts
-```
-
-### Xato: "tsx: command not found"
-```bash
-npm install -D tsx
-npx tsx prisma/seed.ts
-```
-
-### Bazani butunlay qayta tiklash (hamma ma'lumot o'chadi!)
-```bash
-npm run db:reset
-```
-
-### Hech narsa yordam bermayapti?
-1. `node_modules` papkasini o'chiring
-2. `prisma/sohil.db` faylini o'chiring
-3. Qayta: `npm install` → `npm run setup` → `npm run dev`
+| Sahifa | URL | Tavsif |
+|--------|-----|--------|
+| Bosh sahifa | `/` | Barcha stollar |
+| Buyurtma | `/order/[id]` | Mahsulot tanlash, to'lov |
+| Admin | `/admin` | Hisobot, menyu, tarix |
 
 ---
 
-## 📋 Foydali buyruqlar
+## 6. Vercel deploy
 
-| Buyruq | Nima qiladi |
-|--------|-------------|
-| `npm run dev` | Dasturni ishga tushiradi (dev rejim) |
-| `npm run build` | Prodakshn uchun tayyorlaydi |
-| `npm run start` | Prodakshn rejimda ishga tushiradi |
-| `npm run setup` | Baza + seed (1-marta) |
-| `npm run db:seed` | Faqat seed (menyu/stollar qo'shish) |
-| `npm run db:reset` | Bazani 0'dan boshlash |
+Vercel Dashboard → Settings → Environment Variables:
+- `DATABASE_URL`
+- `BLOB_READ_WRITE_TOKEN`
+
+---
+
+## 7. Buyruqlar
+
+```bash
+npm run dev        # Development
+npm run build      # Production build
+npm run db:seed    # Ma'lumot kiritish
+```
